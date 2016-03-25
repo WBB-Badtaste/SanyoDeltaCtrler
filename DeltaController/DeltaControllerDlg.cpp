@@ -150,6 +150,8 @@ BOOL CDeltaControllerDlg::OnInitDialog()
 
 	// TODO: 在此添加额外的初始化代码
 
+	SendDlgItemMessage(IDC_LIST1, LB_SETHORIZONTALEXTENT, 500, 0);//设置listbox每行的宽度
+
 	m_pMsm = new CMotionStateMach(this->m_hWnd);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
@@ -413,7 +415,7 @@ LRESULT CDeltaControllerDlg::OnUpdateRobotPos(WPARAM wParam, LPARAM lParam)
 
 LRESULT CDeltaControllerDlg::OnHanderNyceStatus(WPARAM wParam, LPARAM lParam)
 {
-	m_listBox.AddString(*(CString*)lParam);
+	m_listBox.SetTopIndex(m_listBox.AddString(*(CString*)lParam));
 	return 0;
 }
 
@@ -432,7 +434,7 @@ void CDeltaControllerDlg::PrintStr(const CString &str)
 	string += ": ";
 	string += str;
 	string += "\n";
-	m_listBox.AddString(string);
+	m_listBox.SetTopIndex(m_listBox.AddString(string));
 }
 
 void CDeltaControllerDlg::OnBnClickedBtnBrake()

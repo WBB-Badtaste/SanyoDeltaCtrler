@@ -54,10 +54,10 @@ BOOL CSettingDlg::OnInitDialog()
 	CRect rs; 
 	m_tab.GetClientRect(&rs); 
 	//调整子对话框在父窗口中的位置 
-// 	rs.top		+=1; 
-// 	rs.bottom	-=60; 
-// 	rs.left		+=1; 
-// 	rs.right	-=2; 
+	rs.top		+=30; 
+	rs.bottom	-=10; 
+	rs.left		+=1; 
+	rs.right	-=2; 
 
 	//设置子对话框尺寸并移动到指定位置 
 	m_coordDlg.MoveWindow(&rs); 
@@ -81,17 +81,23 @@ BOOL CSettingDlg::OnInitDialog()
 void CSettingDlg::OnTcnSelchangingTab(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	// TODO: Add your control notification handler code here
-	int nSel = m_tab.GetCurSel();
-	switch(nSel) 
+	*pResult = 0;
+}
+
+
+void CSettingDlg::OnTcnSelchangeTab(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	// TODO: Add your control notification handler code here
+	switch(m_tab.GetCurSel()) 
 	{ 
 	case 0: 
-		m_robotDlg.ShowWindow(SW_HIDE); 
-		m_coordDlg.ShowWindow(SW_SHOW); 
+		m_robotDlg.ShowWindow(SW_SHOW); 
+		m_coordDlg.ShowWindow(SW_HIDE); 
 		m_pointDlg.ShowWindow(SW_HIDE); 
 		break; 
 	case 1: 
-		m_robotDlg.ShowWindow(SW_SHOW); 
-		m_coordDlg.ShowWindow(SW_HIDE); 
+		m_robotDlg.ShowWindow(SW_HIDE); 
+		m_coordDlg.ShowWindow(SW_SHOW); 
 		m_pointDlg.ShowWindow(SW_HIDE); 
 		break; 
 	case 2: 
@@ -102,12 +108,5 @@ void CSettingDlg::OnTcnSelchangingTab(NMHDR *pNMHDR, LRESULT *pResult)
 	default: 
 		break; 
 	}  
-	*pResult = 0;
-}
-
-
-void CSettingDlg::OnTcnSelchangeTab(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	// TODO: Add your control notification handler code here
 	*pResult = 0;
 }
