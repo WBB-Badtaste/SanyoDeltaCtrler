@@ -47,9 +47,9 @@ BOOL CSettingDlg::OnInitDialog()
 	m_tab.InsertItem(1,"坐标系统");  
 	m_tab.InsertItem(2,"特殊坐标");  
 
-	m_coordDlg.Create(IDD_DIALOG_COORDINATE,	GetDlgItem(IDD_DIALOG_SETTING));
-	m_pointDlg.Create(IDD_DIALOG_POINT_SETTING, GetDlgItem(IDD_DIALOG_SETTING));
-	m_robotDlg.Create(IDD_DIALOG_ROBOT_SETTING, GetDlgItem(IDD_DIALOG_SETTING));
+	m_coordDlg.Create(IDD_DIALOG_COORDINATE,	GetDlgItem(IDC_TAB));
+	m_pointDlg.Create(IDD_DIALOG_POINT_SETTING, GetDlgItem(IDC_TAB));
+	m_robotDlg.Create(IDD_DIALOG_ROBOT_SETTING, GetDlgItem(IDC_TAB));
 
 	CRect rs; 
 	m_tab.GetClientRect(&rs); 

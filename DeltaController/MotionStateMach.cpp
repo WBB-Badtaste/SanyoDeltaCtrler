@@ -49,8 +49,6 @@ CMotionStateMach::~CMotionStateMach(void)
 	m_bInit = false;
 
 	NYCE_STATUS nyceStatus(NYCE_OK);
-
-	nyceStatus = NyceError(nyceStatus) ? nyceStatus : Home();
 	
 	nyceStatus = NyceError(nyceStatus) ? nyceStatus : RocksTerm();
 	
@@ -105,7 +103,6 @@ unsigned WINAPI CMotionStateMach::ReadPosThread(void *pParam)
 		::SendMessage(pMSM->m_hMainWnd, WM_UPDATE_ROBOT_POS, NULL, (LPARAM)dRobotPos);
 
 	}
-
 	return 0;
 }
 
@@ -501,10 +498,13 @@ const unsigned int CMotionStateMach::Door()
 		position[1] - doorPars1.startPos.position.y < -0.1 ||
 		position[2] - doorPars1.startPos.position.z < -0.1 )
 		nyceStatus = NyceError(nyceStatus) ? nyceStatus : RocksPtpDelta(doorPars1.startPos, readyPars);
+	for (unsigned i = 0; i < 10000; ++i)
+	{
+		nyceStatus = NyceError(nyceStatus) ? nyceStatus : RocksDoorDelta(doorPars1);
 
-	nyceStatus = NyceError(nyceStatus) ? nyceStatus : RocksDoorDelta(doorPars1);
-
-	nyceStatus = NyceError(nyceStatus) ? nyceStatus : RocksDoorDelta(doorPars2);
+		nyceStatus = NyceError(nyceStatus) ? nyceStatus : RocksDoorDelta(doorPars2);
+	}
+	
 
 	return nyceStatus;
 }
