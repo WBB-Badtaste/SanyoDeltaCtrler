@@ -51,10 +51,6 @@ END_MESSAGE_MAP()
 
 
 // CDeltaControllerDlg 对话框
-
-
-
-
 CDeltaControllerDlg::CDeltaControllerDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CDeltaControllerDlg::IDD, pParent)
 	, m_motion_par_x(0)
@@ -62,17 +58,8 @@ CDeltaControllerDlg::CDeltaControllerDlg(CWnd* pParent /*=NULL*/)
 	, m_motion_par_z(0)
 	, m_motion_par_vel(0)
 	, m_motion_par_direc(0)
-	, m_tTime(0.0)
-	//, m_msm(this->m_hWnd)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	m_tTime = 0.0;
-	m_turn_angle = 0.0;
-
-
-	//  m_dRobotPos_x = 0.0;
-	//  m_dRobotPos_y = 0.0;
-	//  m_dRobotPos_z = 0.0;
 }
 
 
@@ -91,17 +78,6 @@ void CDeltaControllerDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT3, m_motion_par_z);
 	DDX_Text(pDX, IDC_EDIT4, m_motion_par_vel);
 	DDX_Radio(pDX, IDC_RADIO1, m_motion_par_direc);
-// 	DDX_Control(pDX, IDC_COMB_MODEL_SHAP, m_combctr_markShape);
-// 	DDX_Text(pDX, IDC_EDIT_RESULT, m_edit_locate_result);
-// 	DDX_Text(pDX, IDC_EDIT_COSTTIME, m_edit_match_time);
-	//  DDX_Text(pDX, IDC_EDIT5, m_tTime);
-	//	DDX_Text(pDX, IDC_EDIT5, m_tTime);
-	//	DDV_MinMaxDouble(pDX, m_tTime, 0.0, 100);
-	DDX_Text(pDX, IDC_EDIT6, m_turn_angle);
-	DDV_MinMaxDouble(pDX, m_turn_angle, -360, 360);
-	//  DDX_Text(pDX, IDC_EDIT_POS_X, m_dRobotPos_x);
-	//  DDX_Text(pDX, IDC_EDIT_POS_Y, m_dRobotPos_y);
-	//  DDX_Text(pDX, IDC_EDIT_POS_Z, m_dRobotPos_z);
 	DDX_Control(pDX, IDC_EDIT_POS_X, m_bobotPos_x);
 	DDX_Control(pDX, IDC_EDIT_POS_Y, m_bobotPos_y);
 	DDX_Control(pDX, IDC_EDIT_POS_Z, m_bobotPos_z);
@@ -116,10 +92,8 @@ BEGIN_MESSAGE_MAP(CDeltaControllerDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON7, &CDeltaControllerDlg::OnBnClickedPtp)
 	ON_BN_CLICKED(IDC_BUTTON3, &CDeltaControllerDlg::OnBnClickedInit)
 	ON_WM_DESTROY()
-	ON_BN_CLICKED(IDC_CHECK1, &CDeltaControllerDlg::OnBnClickedCheck1)
 	ON_BN_CLICKED(IDC_BUTTON8, &CDeltaControllerDlg::OnBnClickedHome)
 	ON_BN_CLICKED(IDC_BUTTON2, &CDeltaControllerDlg::OnBnClickedBrake)
-//	ON_BN_CLICKED(IDC_BUTTON5, &CDeltaControllerDlg::OnBnClickedShowPos)
 	ON_BN_CLICKED(IDC_BUTTON10, &CDeltaControllerDlg::OnBnClickedButton10)
 	ON_BN_CLICKED(IDC_BUTTON13, &CDeltaControllerDlg::OnBnClickedMove1)
 	ON_BN_CLICKED(IDC_BUTTON11, &CDeltaControllerDlg::OnBnClickedButton11)
@@ -129,12 +103,6 @@ BEGIN_MESSAGE_MAP(CDeltaControllerDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON9, &CDeltaControllerDlg::OnBnClickedCirlce)
 	ON_BN_CLICKED(IDC_BUTTON14, &CDeltaControllerDlg::OnBnClickedCatch)
 	ON_BN_CLICKED(IDC_BUTTON16, &CDeltaControllerDlg::OnBnClickedBelt)
-// 	ON_BN_CLICKED(IDC_BTN_OPENCAMERA, &CDeltaControllerDlg::OnBnClickedBtnOpencamera)
-// 	ON_WM_TIMER()
-// 	ON_BN_CLICKED(IDC_BTN_ATTRIBUTE, &CDeltaControllerDlg::OnBnClickedBtnAttribute)
-// 	ON_BN_CLICKED(IDC_CHECK_SEARCHAREA, &CDeltaControllerDlg::OnBnClickedCheckSearcharea)
-// 	ON_BN_CLICKED(IDC_BTN_LEARN_MODEL, &CDeltaControllerDlg::OnBnClickedBtnLearnModel)
-// 	ON_BN_CLICKED(IDC_BTN_MATCH_MODEL, &CDeltaControllerDlg::OnBnClickedBtnMatchModel)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
@@ -143,12 +111,10 @@ BEGIN_MESSAGE_MAP(CDeltaControllerDlg, CDialogEx)
 	ON_WM_RBUTTONDBLCLK()
 
 	//----JoMar,20160116
-//	ON_MESSAGE(WM_MATCH_MODEL, OnMatchModel) 
 	ON_MESSAGE(WM_HANDLE_NYCESTATUS, OnHanderNyceStatus) 
 	ON_MESSAGE(WM_UPDATE_ROBOT_POS, OnUpdateRobotPos) 
-	ON_EN_CHANGE(IDC_EDIT5, &CDeltaControllerDlg::OnEnChangeEdit5)
-//	ON_BN_CLICKED(IDC_BUTTON19, &CDeltaControllerDlg::OnBnClickedButton19)
-	ON_BN_CLICKED(IDC_BUTTON_TURN, &CDeltaControllerDlg::OnBnClickedButtonTurn)
+	ON_MESSAGE(WM_UPDATE_BTN, OnUpdateBtn) 
+	ON_BN_CLICKED(IDC_BUTTON_SETTING, &CDeltaControllerDlg::OnBnClickedButtonSetting)
 END_MESSAGE_MAP()
 
 
@@ -183,13 +149,11 @@ BOOL CDeltaControllerDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-	
 
 	m_pMsm = new CMotionStateMach(this->m_hWnd);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
-
 
 void CDeltaControllerDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
@@ -204,11 +168,9 @@ void CDeltaControllerDlg::OnSysCommand(UINT nID, LPARAM lParam)
 	}
 }
 
-
 // 如果向对话框添加最小化按钮，则需要下面的代码
 //  来绘制该图标。对于使用文档/视图模型的 MFC 应用程序，
 //  这将由框架自动完成。
-
 void CDeltaControllerDlg::OnPaint()
 {
 	
@@ -236,15 +198,12 @@ void CDeltaControllerDlg::OnPaint()
 	}
 }
 
-
 //当用户拖动最小化窗口时系统调用此函数取得光标
 //显示。
 HCURSOR CDeltaControllerDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
 }
-
-
 
 void CDeltaControllerDlg::OnBnClickedDoor()//门型运动
 {
@@ -260,7 +219,6 @@ void CDeltaControllerDlg::OnBnClickedDoor()//门型运动
 	if(!m_pMsm->SwitchToDoorState(m_motion_par_vel))
 		PrintStr("Robot is not ready.");
 }
-
 
 void CDeltaControllerDlg::OnBnClickedPtp()//移动到指定点
 {
@@ -294,7 +252,6 @@ void CDeltaControllerDlg::OnBnClickedInit()//初始化
 	}
 }
 
-
 void CDeltaControllerDlg::OnDestroy()
 {
 	CDialogEx::OnDestroy();
@@ -303,13 +260,6 @@ void CDeltaControllerDlg::OnDestroy()
 
 	delete m_pMsm;
 
-}
-
-
-void CDeltaControllerDlg::OnBnClickedCheck1()
-{
-	// TODO: Add your control notification handler code here
-/*	NYCE_STATUS nyceStatus(NYCE_OK);*/
 }
 
 void CDeltaControllerDlg::OnBnClickedHome()//回零位
@@ -321,52 +271,11 @@ void CDeltaControllerDlg::OnBnClickedHome()//回零位
 	}
 }
 
-
 void CDeltaControllerDlg::OnBnClickedBrake()//刹车控制
 {
 	// TODO: Add your control notification handler code here
-// 	NYCE_STATUS nyceStatus(NYCE_OK);
-// 
-// 	NYCE_DIGITAL_IO_ID io;
-// 	io.slotId = NYCE_SLOT0;
-// 
-// 	uint32_t ioStatus1(0), ioStatus2(0), ioStatus3(0);
-// 	io.digIONr = NYCE_DIGOUT0;
-// 	nyceStatus = NyceError(nyceStatus) ? nyceStatus : NhiReadDigitalIO(noId[0], io, &ioStatus1);
-// 	io.digIONr = NYCE_DIGOUT1;
-// 	nyceStatus = NyceError(nyceStatus) ? nyceStatus : NhiReadDigitalIO(noId[0], io, &ioStatus2);
-// 	io.digIONr = NYCE_DIGOUT2;
-// 	nyceStatus = NyceError(nyceStatus) ? nyceStatus : NhiReadDigitalIO(noId[0], io, &ioStatus3);
-// 
-// 	if (ioStatus1 && ioStatus2 && ioStatus3)
-// 	{
-// 		io.digIONr = NYCE_DIGOUT0;
-// 		nyceStatus = NyceError(nyceStatus) ? nyceStatus : NhiClearDigitalOutput(noId[0], io);
-// 
-// 		io.digIONr = NYCE_DIGOUT1;
-// 		nyceStatus = NyceError(nyceStatus) ? nyceStatus : NhiClearDigitalOutput(noId[0], io);
-// 
-// 		io.digIONr = NYCE_DIGOUT2;
-// 		nyceStatus = NyceError(nyceStatus) ? nyceStatus : NhiClearDigitalOutput(noId[0], io);
-// 	}
-// 	else
-// 	{
-// 		io.digIONr = NYCE_DIGOUT0;
-// 		nyceStatus = NyceError(nyceStatus) ? nyceStatus : NhiSetDigitalOutput(noId[0], io);
-// 
-// 		io.digIONr = NYCE_DIGOUT1;
-// 		nyceStatus = NyceError(nyceStatus) ? nyceStatus : NhiSetDigitalOutput(noId[0], io);
-// 
-// 		io.digIONr = NYCE_DIGOUT2;
-// 		nyceStatus = NyceError(nyceStatus) ? nyceStatus : NhiSetDigitalOutput(noId[0], io);
-// 	}
-// 
-// 	StatusHandle(nyceStatus);
+
 }
-
-
-
-
 
 void CDeltaControllerDlg::OnBnClickedButton10()//-1
 {
@@ -375,7 +284,6 @@ void CDeltaControllerDlg::OnBnClickedButton10()//-1
 	m_pMsm->SwitchToJogState(-1, m_motion_par_direc);
 }
 
-
 void CDeltaControllerDlg::OnBnClickedMove1()//+1
 {
 	// TODO: Add your control notification handler code here
@@ -383,14 +291,12 @@ void CDeltaControllerDlg::OnBnClickedMove1()//+1
 	m_pMsm->SwitchToJogState(1, m_motion_par_direc);
 }
 
-
 void CDeltaControllerDlg::OnBnClickedButton11()//-10
 {
 	// TODO: Add your control notification handler code here
 	UpdateData(TRUE);
 	m_pMsm->SwitchToJogState(-10, m_motion_par_direc);
 }
-
 
 void CDeltaControllerDlg::OnBnClickedMove10()//+10
 {
@@ -419,7 +325,6 @@ void CDeltaControllerDlg::OnBnClickedPump()//控制真空泵
 // 	StatusHandle(nyceStatus);
 }
 
-
 void CDeltaControllerDlg::OnBnClickedSwitch()//控制电磁阀
 {
 	// TODO: Add your control notification handler code here
@@ -440,7 +345,6 @@ void CDeltaControllerDlg::OnBnClickedSwitch()//控制电磁阀
 // 	StatusHandle(nyceStatus);
 }
 
-
 void CDeltaControllerDlg::OnBnClickedCirlce()//圆形轨迹
 {
 	// TODO: Add your control notification handler code here
@@ -457,7 +361,6 @@ void CDeltaControllerDlg::OnBnClickedCirlce()//圆形轨迹
 	}
 }
 
-
 void CDeltaControllerDlg::OnBnClickedCatch()
 {
 
@@ -467,7 +370,6 @@ void CDeltaControllerDlg::OnBnClickedCatch()
 	}
 
 }
-
 
 void CDeltaControllerDlg::OnBnClickedBelt()//传送带控制
 {
@@ -490,8 +392,6 @@ void CDeltaControllerDlg::OnBnClickedBelt()//传送带控制
 // 
 // 	StatusHandle(nyceStatus);
 }
-
-
 
 LRESULT CDeltaControllerDlg::OnUpdateRobotPos(WPARAM wParam, LPARAM lParam)
 {
@@ -517,26 +417,10 @@ LRESULT CDeltaControllerDlg::OnHanderNyceStatus(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-void CDeltaControllerDlg::OnEnChangeEdit5()
+LRESULT CDeltaControllerDlg::OnUpdateBtn(WPARAM wParam, LPARAM lParam)
 {
-	// TODO:  If this is a RICHEDIT control, the control will not
-	// send this notification unless you override the CDialogEx::OnInitDialog()
-	// function and call CRichEditCtrl().SetEventMask()
-	// with the ENM_CHANGE flag ORed into the mask.
-
-	// TODO:  Add your control notification handler code here
+	return 0;
 }
-
-
-
-void CDeltaControllerDlg::OnBnClickedButtonTurn()
-{
-	// TODO: Add your control notification handler code here
-	UpdateData(TRUE);
-//	RocksRotateAngle(m_turn_angle);
-	UpdateData(FALSE);
-}
-
 
 void CDeltaControllerDlg::PrintStr(const CString &str)
 {
@@ -549,4 +433,16 @@ void CDeltaControllerDlg::PrintStr(const CString &str)
 	string += str;
 	string += "\n";
 	m_listBox.AddString(string);
+}
+
+void CDeltaControllerDlg::OnBnClickedBtnBrake()
+{
+	// TODO: Add your control notification handler code here
+	m_pMsm->SwitchToCtrlBrakeState();
+}
+
+void CDeltaControllerDlg::OnBnClickedButtonSetting()
+{
+	// TODO: Add your control notification handler code here
+	m_setDlg.DoModal();
 }

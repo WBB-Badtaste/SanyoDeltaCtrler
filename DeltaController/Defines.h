@@ -9,18 +9,18 @@
 
 //位姿轴
 #define NUM_AXES 3
-static const char *axName[ NUM_AXES ] = { "DEF_AXIS_3", "DEF_AXIS_1", "DEF_AXIS_2"};
+static const char *axName[ NUM_AXES ] = {"DEF_AXIS_1", "DEF_AXIS_2","DEF_AXIS_3"};
 static SAC_AXIS axId[ NUM_AXES ];
 
-//旋转轴
-#define NUM_AXES_ROTATION 1
-static const char *rotationName[ NUM_AXES_ROTATION ] = {"DEF_AXIS_4"};
-static SAC_AXIS rotationId[ NUM_AXES_ROTATION ];
-
-//皮带轴
-#define NUM_AXES_BELT 1
-static const char *beltaName[ NUM_AXES_BELT ] = {"DEF_AXIS_5"};
-static SAC_AXIS beltId[ NUM_AXES_BELT ];
+// 旋转轴
+// #define NUM_AXES_ROTATION 1
+// static const char *rotationName[ NUM_AXES_ROTATION ] = {"DEF_AXIS_4"};
+// static SAC_AXIS rotationId[ NUM_AXES_ROTATION ];
+// 
+// 皮带轴
+// #define NUM_AXES_BELT 1
+// static const char *beltaName[ NUM_AXES_BELT ] = {"DEF_AXIS_5"};
+// static SAC_AXIS beltId[ NUM_AXES_BELT ];
 
 //节点
 #define NUM_NODE 1
@@ -54,8 +54,8 @@ static ROCKS_COORD g_placePos;
 static ROCKS_COORD g_pickPos;
 
 //门型运动参数
-#define DOOR_HIGHT1 -835
-#define DOOR_HIGHT2 -835
+#define DOOR_HIGHT1 -500
+#define DOOR_HIGHT2 -500
 #define DOOR_PAR_X 152.5
 #define DOOR_PAR_Y 0
 
@@ -70,3 +70,4 @@ static ROCKS_COORD g_pickPos;
 #define WM_MATCH_MODEL			WM_USER + 1
 #define WM_HANDLE_NYCESTATUS	WM_USER + 2
 #define WM_UPDATE_ROBOT_POS		WM_USER + 3
+#define WM_UPDATE_BTN			WM_USER + 4

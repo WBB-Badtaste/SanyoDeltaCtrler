@@ -67,21 +67,21 @@ static NYCE_STATUS RocksInitDelta(const uint32_t &axesNum, const SAC_AXIS* const
 // 	double rf = 90;
 
 //相聚本体
-// 	double e = 65;     
-// 	double f = 220;    
-// 	double re = 650;
-// 	double rf = 330;
+	double e = 65;     
+	double f = 220;    
+	double re = 650;
+	double rf = 314.00636936;
 
-	double e = 70;  
-	double f = 220; 
-	double re = 1000;
-	double rf = 400;
+// 	double e = 70;  
+// 	double f = 220; 
+// 	double re = 1000;
+// 	double rf = 400;
 
 	nyceStatus = NyceError(nyceStatus) ? nyceStatus : RocksSetMechParsDelta(f, e, rf, re);
 
 /*	double rate_angle2pu = 131072 * 11 / (2 * M_PI);//山洋机器人*/
-/*	double rate_angle2pu_robot = 131072 * 40 / (2 * M_PI);//相聚机器人*/
-	double rate_angle2pu_robot = 131072 * 33 / (2 * M_PI);//大族机器人
+	double rate_angle2pu_robot = 10000 * 40 / (2 * M_PI);//相聚机器人
+/*	double rate_angle2pu_robot = 131072 * 33 / (2 * M_PI);//大族机器人*/
 	double rate_angle2pu_belta = 131072 * 5 / (2 * M_PI);
 	nyceStatus = NyceError(nyceStatus) ? nyceStatus : RocksSetPuRateDelta(rate_angle2pu_robot, rate_angle2pu_belta);
 
@@ -816,7 +816,7 @@ static NYCE_STATUS RocksHomeDelta(const TRAJ_PARS &trajPars)
 		ROCKS_COORD ptpPos;
 		ptpPos.position.x = cartesianPos[0];
 		ptpPos.position.y = cartesianPos[1];
-		ptpPos.position.z = cartesianPos[2] + 80;
+		ptpPos.position.z = cartesianPos[2];
 		ptpPos.type = KIN_COORD;
 
 		nyceStatus = NyceError(nyceStatus) ? nyceStatus : RocksSetHomePos(ptpPos);
@@ -902,79 +902,79 @@ static NYCE_STATUS RocksTermMatrix()
 static NYCE_STATUS RocksCalcCatchPos(const TRAJ_PARS &motionPars, const ROCKS_COORD &placeRobotPos_kin, const ROCKS_COORD &placeTargetPos_kin, const double endBufHeightOffset, ROCKS_COORD &meetingPos_kin)
 {
 	NYCE_STATUS nyceStatus(NYCE_OK);
-
-	//读取当前的皮带编码器位置和速度
-	double encoderVel, encoderPos;
-	nyceStatus = NyceError( nyceStatus ) ? nyceStatus : SacReadVariable(beltId[0], SAC_VAR_AXIS_VEL, &encoderVel);
-	nyceStatus = NyceError( nyceStatus ) ? nyceStatus : SacReadVariable(beltId[0], SAC_VAR_AXIS_POS, &encoderPos);
-
-	//目标在机构坐标系的当前位置
-	double moveLen = (encoderPos - placeTargetPos_kin.cuEncoderValue) / BELT_BASE_RATE;//相对放置点而言，目标已经向前行了一段距离
-	ROCKS_COORD cuTargetPos_kin;
-	cuTargetPos_kin.type = KIN_COORD;
-	cuTargetPos_kin.position.x = placeTargetPos_kin.position.x;
-	cuTargetPos_kin.position.y = placeTargetPos_kin.position.y + moveLen * KIN_BASE_RATE;
-	cuTargetPos_kin.position.z = placeTargetPos_kin.position.z + endBufHeightOffset * KIN_BASE_RATE;
-
-	//传送带在皮带坐标系中的速度
-	ROCKS_COORD beltVel_belt;
-	beltVel_belt.type = BELT_COORD;
-	beltVel_belt.position.x = 0;
-	beltVel_belt.position.y = encoderVel;
-	beltVel_belt.position.z = 0;
-
-	//传送带在机构坐标系中的速度
-	ROCKS_COORD beltVel_kin;
-	beltVel_kin.type = KIN_COORD;
-	ConvertTwoCoordinate(beltVel_belt, beltVel_kin);
-
-	//计算由于时间残生的目标位置误差
-	ROCKS_COORD threshold_kin;
-	threshold_kin.type = KIN_COORD;
-	threshold_kin.position.x = beltVel_kin.position.x * THRESHOLD_TIME;
-	threshold_kin.position.y = beltVel_kin.position.y * THRESHOLD_TIME;
-	threshold_kin.position.z = beltVel_kin.position.z * THRESHOLD_TIME;
-
-	//方程参数简化
-	double parX(placeRobotPos_kin.position.x - cuTargetPos_kin.position.x);
-	double parY(placeRobotPos_kin.position.y - cuTargetPos_kin.position.y); 
-	double parZ(placeRobotPos_kin.position.z - cuTargetPos_kin.position.z);
-
-
-	//计算参数项
-	double A(beltVel_kin.position.x * beltVel_kin.position.x + beltVel_kin.position.y * beltVel_kin.position.y - motionPars.velocity * motionPars.velocity / 4 );
-	double B(-2 * (parX * beltVel_kin.position.x + parY * beltVel_kin.position.y + parZ * beltVel_kin.position.z));
-	double C(parX * parX + parY * parY + parZ * parZ);
-
-	//韦达定理计算时间
-	double delta(B * B - 4 * A * C);
-	if (delta < 0)
-		return ROCKS_ERR_CALC_CATCH_POS_FAIL;
-
-	double time, x1, x2;
-	if (delta == 0)
-	{
-		x1 = (sqrt(delta) - B) / 2 / A;
-		if (x1 < 0)
-			return ROCKS_ERR_CALC_CATCH_POS_FAIL;
-		else time = x1;
-	}
-	else
-	{
-		x1 = ( sqrt(delta) - B) / 2 / A;
-		x2 = (-sqrt(delta) - B) / 2 / A;
-		if (x1 <= 0 && x2 <= 0)
-			return ROCKS_ERR_CALC_CATCH_POS_FAIL;
-		else 
-			time = max(x1, x2);
-	}
-
-	//计算相遇点
-	meetingPos_kin.position.x = cuTargetPos_kin.position.x + beltVel_kin.position.x * time + threshold_kin.position.x;
-	meetingPos_kin.position.y = cuTargetPos_kin.position.y + beltVel_kin.position.y * time + threshold_kin.position.y;
-	meetingPos_kin.position.z = cuTargetPos_kin.position.z + beltVel_kin.position.z * time + threshold_kin.position.z;
-
-	//这里添加判断是否在抓取区
+// 
+// 	//读取当前的皮带编码器位置和速度
+// 	double encoderVel, encoderPos;
+// 	nyceStatus = NyceError( nyceStatus ) ? nyceStatus : SacReadVariable(beltId[0], SAC_VAR_AXIS_VEL, &encoderVel);
+// 	nyceStatus = NyceError( nyceStatus ) ? nyceStatus : SacReadVariable(beltId[0], SAC_VAR_AXIS_POS, &encoderPos);
+// 
+// 	//目标在机构坐标系的当前位置
+// 	double moveLen = (encoderPos - placeTargetPos_kin.cuEncoderValue) / BELT_BASE_RATE;//相对放置点而言，目标已经向前行了一段距离
+// 	ROCKS_COORD cuTargetPos_kin;
+// 	cuTargetPos_kin.type = KIN_COORD;
+// 	cuTargetPos_kin.position.x = placeTargetPos_kin.position.x;
+// 	cuTargetPos_kin.position.y = placeTargetPos_kin.position.y + moveLen * KIN_BASE_RATE;
+// 	cuTargetPos_kin.position.z = placeTargetPos_kin.position.z + endBufHeightOffset * KIN_BASE_RATE;
+// 
+// 	//传送带在皮带坐标系中的速度
+// 	ROCKS_COORD beltVel_belt;
+// 	beltVel_belt.type = BELT_COORD;
+// 	beltVel_belt.position.x = 0;
+// 	beltVel_belt.position.y = encoderVel;
+// 	beltVel_belt.position.z = 0;
+// 
+// 	//传送带在机构坐标系中的速度
+// 	ROCKS_COORD beltVel_kin;
+// 	beltVel_kin.type = KIN_COORD;
+// 	ConvertTwoCoordinate(beltVel_belt, beltVel_kin);
+// 
+// 	//计算由于时间残生的目标位置误差
+// 	ROCKS_COORD threshold_kin;
+// 	threshold_kin.type = KIN_COORD;
+// 	threshold_kin.position.x = beltVel_kin.position.x * THRESHOLD_TIME;
+// 	threshold_kin.position.y = beltVel_kin.position.y * THRESHOLD_TIME;
+// 	threshold_kin.position.z = beltVel_kin.position.z * THRESHOLD_TIME;
+// 
+// 	//方程参数简化
+// 	double parX(placeRobotPos_kin.position.x - cuTargetPos_kin.position.x);
+// 	double parY(placeRobotPos_kin.position.y - cuTargetPos_kin.position.y); 
+// 	double parZ(placeRobotPos_kin.position.z - cuTargetPos_kin.position.z);
+// 
+// 
+// 	//计算参数项
+// 	double A(beltVel_kin.position.x * beltVel_kin.position.x + beltVel_kin.position.y * beltVel_kin.position.y - motionPars.velocity * motionPars.velocity / 4 );
+// 	double B(-2 * (parX * beltVel_kin.position.x + parY * beltVel_kin.position.y + parZ * beltVel_kin.position.z));
+// 	double C(parX * parX + parY * parY + parZ * parZ);
+// 
+// 	//韦达定理计算时间
+// 	double delta(B * B - 4 * A * C);
+// 	if (delta < 0)
+// 		return ROCKS_ERR_CALC_CATCH_POS_FAIL;
+// 
+// 	double time, x1, x2;
+// 	if (delta == 0)
+// 	{
+// 		x1 = (sqrt(delta) - B) / 2 / A;
+// 		if (x1 < 0)
+// 			return ROCKS_ERR_CALC_CATCH_POS_FAIL;
+// 		else time = x1;
+// 	}
+// 	else
+// 	{
+// 		x1 = ( sqrt(delta) - B) / 2 / A;
+// 		x2 = (-sqrt(delta) - B) / 2 / A;
+// 		if (x1 <= 0 && x2 <= 0)
+// 			return ROCKS_ERR_CALC_CATCH_POS_FAIL;
+// 		else 
+// 			time = max(x1, x2);
+// 	}
+// 
+// 	//计算相遇点
+// 	meetingPos_kin.position.x = cuTargetPos_kin.position.x + beltVel_kin.position.x * time + threshold_kin.position.x;
+// 	meetingPos_kin.position.y = cuTargetPos_kin.position.y + beltVel_kin.position.y * time + threshold_kin.position.y;
+// 	meetingPos_kin.position.z = cuTargetPos_kin.position.z + beltVel_kin.position.z * time + threshold_kin.position.z;
+// 
+// 	//这里添加判断是否在抓取区
 
 	return nyceStatus;
 }
@@ -1000,13 +1000,9 @@ static NYCE_STATUS RocksGetTargetPos(ROCKS_COORD &targetPos)
 {
 	NYCE_STATUS nyceSatus(NYCE_OK);
 
-	double beltPos;
-	nyceSatus = NyceError(nyceSatus) ? nyceSatus : SacReadVariable(beltId[0], SAC_VAR_AXIS_POS, &beltPos);
+// 	double beltPos;
+// 	nyceSatus = NyceError(nyceSatus) ? nyceSatus : SacReadVariable(beltId[0], SAC_VAR_AXIS_POS, &beltPos);
 
-// 	//不能计算重复长度，很不精确
-// 	int fac = beltPos;
-// 	beltPos -= fac
-// 	//过滤掉反面
 
 	return nyceSatus;
 }
@@ -1020,26 +1016,26 @@ static NYCE_STATUS RocksGetTargetPos(ROCKS_COORD &targetPos)
 static NYCE_STATUS RocksRotateAngle(const double angle)
 {
 	NYCE_STATUS nyceStatus(NYCE_OK);
-
-	//将角度取值为0~360度
-	double correctAngle(angle - ((int)angle / 360) * 360.0);
-
-	//将角度取值为-180~180度
-	if (correctAngle >= 0)
-		correctAngle = correctAngle <=  180.0 ? correctAngle : correctAngle - 360.0;
-	else
-		correctAngle = correctAngle >= -180.0 ? correctAngle : correctAngle + 360.0;
-
-	const double pos(correctAngle * ROTATE_ANGLE_RATE);
-
-	SAC_PTP_PARS ptpPos_rotation;
-	ptpPos_rotation.positionReference = SAC_RELATIVE;
-	ptpPos_rotation.position = pos;
-	ptpPos_rotation.velocity = ROTATE_VEL * ROTATE_ANGLE_RATE;
-	ptpPos_rotation.acceleration = ptpPos_rotation.velocity * 10;
-	ptpPos_rotation.jerk = ptpPos_rotation.velocity * 100;
-
-	nyceStatus = NyceError(nyceStatus) ? nyceStatus : SacPointToPoint(rotationId[0], &ptpPos_rotation);
+// 
+// 	//将角度取值为0~360度
+// 	double correctAngle(angle - ((int)angle / 360) * 360.0);
+// 
+// 	//将角度取值为-180~180度
+// 	if (correctAngle >= 0)
+// 		correctAngle = correctAngle <=  180.0 ? correctAngle : correctAngle - 360.0;
+// 	else
+// 		correctAngle = correctAngle >= -180.0 ? correctAngle : correctAngle + 360.0;
+// 
+// 	const double pos(correctAngle * ROTATE_ANGLE_RATE);
+// 
+// 	SAC_PTP_PARS ptpPos_rotation;
+// 	ptpPos_rotation.positionReference = SAC_RELATIVE;
+// 	ptpPos_rotation.position = pos;
+// 	ptpPos_rotation.velocity = ROTATE_VEL * ROTATE_ANGLE_RATE;
+// 	ptpPos_rotation.acceleration = ptpPos_rotation.velocity * 10;
+// 	ptpPos_rotation.jerk = ptpPos_rotation.velocity * 100;
+// 
+// 	nyceStatus = NyceError(nyceStatus) ? nyceStatus : SacPointToPoint(rotationId[0], &ptpPos_rotation);
 
 	return nyceStatus;
 }

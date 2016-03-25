@@ -123,6 +123,9 @@ NYCE_STATUS InitAxisRexroth(const uint32_t &axesNum, SAC_AXIS* const axId, const
 
 			case SAC_INACTIVE:
 INACTIVE:		
+				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacHome( axId[ ax ] );
+				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacSynchronize( axId[ ax ], SAC_REQ_HOMING_COMPLETED, 10 );
+				
 				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacReadVariable(axId[ ax ], SAC_VAR_BLAC_ALIGNED, &signal);
 				if (signal == 0)
 				{
@@ -137,8 +140,7 @@ INACTIVE:
 				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacLock( axId[ ax ] );
 				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacSynchronize( axId[ ax ], SAC_REQ_LOCK, 10 );
 
-				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacHome( axId[ ax ] );
-				nyceStatus =  NyceError(nyceStatus) ? nyceStatus : SacSynchronize( axId[ ax ], SAC_REQ_HOMING_COMPLETED, 10 );
+				
 
 				break;
 			}
